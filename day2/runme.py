@@ -1,101 +1,50 @@
+import re
+
 DEBUG = False
 
 class filethingy:
 
     values = []
 
-    def __init__(self):
+    def __init__(self, filename):
         self.values = []
-        f = open('input.txt', 'r')
+        f = open(filename, 'r')
         for line in f:
-            self.values.append(int(line))
+            self.values.append(line)
 
         print("input: ", self.values)
 
 
-# class find2020s:
-
-#     mydata = filethingy()
-
-#     def getfirstresult(self):
-#         for x in range(len(self.mydata.values)-1):
-#             for y in range(x+1, len(self.mydata.values)):
-#                 if DEBUG:
-#                     print(x,y, self.mydata.values[x] + self.mydata.values[y])
-#                 if (self.mydata.values[x] + self.mydata.values[y]) == 2020:
-#                     print(x, y, self.mydata.values[x], self.mydata.values[y], self.mydata.values[x]*self.mydata.values[y])
-#                     exit()
-
-class findN2020s:
-
-    mydata = filethingy()
+class findvalid:
+    """class to solve the problem at hand
+    """
     
-    def __init__(self, n, s):
-        """ find the first n entries in the values list which sum to s
-        """
-
-        self.n = n
-        self.s = s
-        self.result = {}
-    
-        print(self.n, self.s)
+    def __init__(self, filename):
+        self.result = 0  # Count of valid passwords
+        self.mydata = filethingy(filename)
 
     def solve(self):
-        self.result = self.recurseN(self.n, self.s, 0)
+        for item in self.mydata.values:
+            parsed = list(re.findall(r'(\d+)-(\d+).([a-z]):.([a-z]+)', item))[0]
+            isValid = self.testValid(parsed[0], parsed[1], parsed[2], parsed[3])
+            print(isValid)
+            if isValid:
+                self.result += 1
+        return self.result
 
-    def multiplyResult(self):
-        total = 1
-        for item in self.result['solutionValues']:
-            total *= item
-        print("Grand Total: ", total)
-
-    
-    def recurseN(self, n, s, i):
-        """recursive function that finds n elements which sum to s
-        from a SUBSET of self.mydata.values, namely in the range [i, len(values)]
-        """
-
-        print(f"recursed with ({n}, {s}, {i})")
-        # Could make this its own more useful class, but a dict of lists is OK for now
-        solution = {'solutionIndexes': [],
-                    'solutionValues': []}
-
-        for candidateIndex in range(i, len(self.mydata.values) - n + 1):  # Must test for off-by-one errors
-            print(f"Depth: {n} at candidateIndex: {candidateIndex}, with len(values) = {len(self.mydata.values)}")
-            candidate = self.mydata.values[candidateIndex]
-            if n == 1:   # Only terminate if we are here
-                if candidate == s:
-                    solution['solutionIndexes'] = [candidateIndex]
-                    solution['solutionValues'] = [candidate]
-                    print(f"yay: {solution}")
-                    return(solution)
-                else:
-                    continue
-            else:
-                if candidate > s:  # Short circuit
-                    print ("Nope: {candidate} > {s}")
-                    continue
-                else:
-                    rMore = self.recurseN(n-1, s-candidate, candidateIndex+1)
-                    if rMore:
-                        solution['solutionIndexes'].extend(rMore['solutionIndexes'])
-                        solution['solutionValues'].extend(rMore['solutionValues'])
-                        solution['solutionIndexes'].extend([candidateIndex])
-                        solution['solutionValues'].extend([candidate])
-                        print(f"Solved ({n}, {s}, {i}) with:")
-                        print(solution)
-                        return(solution)
-            
-        return None
-                        
+    def testValid(self, lownum, highnum, letter, password):
+        print(f"{lownum}, {highnum}, {letter}, {password}")
+        count = password.count(letter)
+        print(f"count: {count}")
+        if int(lownum) <= count <= int(highnum):
+            return True
+        else:
+            return False
 
 # mything = find2020s()
 # mything.getfirstresult()
+test = filethingy('testinput.txt')
 
-mything2 = findN2020s(2, 2020)
+mything2 = findvalid('input.txt')
 mything2.solve()
-
-mything3 = findN2020s(3, 2020)
-mything3.solve()
-mything3.multiplyResult()
-
+print(mything2.result)
