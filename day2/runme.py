@@ -6,7 +6,7 @@ class filethingy:
 
     def __init__(self):
         self.values = []
-        f = open('testinput.txt', 'r')
+        f = open('input.txt', 'r')
         for line in f:
             self.values.append(int(line))
 
@@ -36,11 +36,19 @@ class findN2020s:
 
         self.n = n
         self.s = s
+        self.result = {}
     
         print(self.n, self.s)
 
     def solve(self):
-        result = self.recurseN(self.n, self.s, 0)
+        self.result = self.recurseN(self.n, self.s, 0)
+
+    def multiplyResult(self):
+        total = 1
+        for item in self.result['solutionValues']:
+            total *= item
+        print("Grand Total: ", total)
+
     
     def recurseN(self, n, s, i):
         """recursive function that finds n elements which sum to s
@@ -74,11 +82,11 @@ class findN2020s:
                         solution['solutionValues'].extend(rMore['solutionValues'])
                         solution['solutionIndexes'].extend([candidateIndex])
                         solution['solutionValues'].extend([candidate])
-                        print("Solved ({n}, {s}, {i}) with:")
+                        print(f"Solved ({n}, {s}, {i}) with:")
                         print(solution)
                         return(solution)
             
-            return None
+        return None
                         
 
 # mything = find2020s()
@@ -86,3 +94,8 @@ class findN2020s:
 
 mything2 = findN2020s(2, 2020)
 mything2.solve()
+
+mything3 = findN2020s(3, 2020)
+mything3.solve()
+mything3.multiplyResult()
+
