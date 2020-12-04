@@ -62,13 +62,12 @@ class countValid:
         rvalue = None
         # print(f"searching for {myKey} in {passport}")
         myFind = re.search(f'{myKey}:([#\w]+)', passport)
-        if myKey == 'byr' and myFind:
-            print(f"byr value: {myFind.group(1)}")
+
         if myFind:
             x = myFind.group(1)
             if myKey == 'byr':
                 myFind = re.search('(^\d{4})$', x)
-                print(f'byr test for {myFind.group(1)}')
+                print(f'byr test for {myFind.group(1)} (also {x})')
                 if myFind and (x < '1920' or x > '2002'):
                     print(f"could not validate byr for {x}")
                     myFind = None
@@ -98,7 +97,8 @@ class countValid:
                     myFind = None
 
             elif myKey == 'hcl':
-                myFind = re.search('^#[0-9a-d]{6}$', x)
+                myFind = re.search('^#[0-9a-f]{6}$', x)
+                print(f"hcl: {myFind} from {x}")
             elif myKey == 'ecl':
                 myFind = re.search('^amb$|^blu$|^brn$|^gry$|^grn$|^hzl$|^oth$', x)
             elif myKey == 'pid':
