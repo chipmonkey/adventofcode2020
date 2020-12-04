@@ -31,7 +31,6 @@ class countValid:
     """
     
     keys = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid', 'cid']
-    valids = ['']
 
     def __init__(self, filename):
         self.result = 0  # Count of valid passports
@@ -62,51 +61,8 @@ class countValid:
         rvalue = None
         # print(f"searching for {myKey} in {passport}")
         myFind = re.search(f'{myKey}:([#\w]+)', passport)
-        if myKey == 'byr' and myFind:
-            print(f"byr value: {myFind.group(1)}")
-        if myFind:
-            x = myFind.group(1)
-            if myKey == 'byr':
-                myFind = re.search('(^\d{4})$', x)
-                print(f'byr test for {myFind.group(1)}')
-                if myFind and (x < '1920' or x > '2002'):
-                    print(f"could not validate byr for {x}")
-                    myFind = None
-            elif myKey == 'iyr':
-                myFind = re.search('(^\d{4})$', x)
-                if myFind and (x < '2010' or x > '2020'):
-                    myFind = None
-            elif myKey == 'eyr':
-                myFind = re.search('(^\d{4})$', x)
-                if myFind and (x < '2020' or x > '2030'):
-                    myFind = None
-            elif myKey == 'hgt':
-                parsed = re.findall('(^\d{2,3})(cm|in)$', x)
-                if parsed:
-                    parsed = parsed[0]
-                    print(f"Parsed: {parsed}")
-                    height = parsed[0]
-                    unit = parsed[1]
-                    if isinstance(int(height[0]), int):
-                        if unit == 'cm' and '150' <= height <= '193':
-                            myFind = parsed[0] + parsed[1]
-                        elif unit == 'in' and '59' <= height <= '76':
-                            myFind = parsed[0] + parsed[1]
-                        else:
-                            myFind = None
-                else:
-                    myFind = None
-
-            elif myKey == 'hcl':
-                myFind = re.search('^#[0-9a-d]{6}$', x)
-            elif myKey == 'ecl':
-                myFind = re.search('^amb$|^blu$|^brn$|^gry$|^grn$|^hzl$|^oth$', x)
-            elif myKey == 'pid':
-                myFind = re.search('^\d{9}$', x)
-            elif myKey == 'cid':
-                pass
-            else:
-                myFind = None
+        # if myFind:
+        #     print(f"Found: {myFind.group()}")
         return myFind
 
 
