@@ -44,6 +44,25 @@ class bagMap:
         if newbag not in self.bags:
             self.bags.append(newbag)
 
+    def getDirectParents(self, bagName):
+        """Get list of bags which contain a given bag"""
+        results = []
+        for bag in self.bags:
+            for innerbag in bag.contents:
+                if bagName == innerbag['targetBag']:
+                    print(f"Found {bagName} in {bag.bagName}")
+                    results.append(bag)
+        print(f"Direct results are {results}")
+        return(results)
+    
+    def getDirectParentsFromList(self, bagNameList):
+        """"""
+        results = []
+        for bag in bagNameList:
+            results.extend(self.getDirectParents(bag))
+        print(f"results are {results}")
+        return(results)
+
     def __repr__(self):
         self.__str__()
     
@@ -52,7 +71,7 @@ class bagMap:
             print(bag)
 
 
-class day1:
+class part1:
     """class to solve the problem at hand
     """
 
@@ -68,6 +87,24 @@ class day1:
             self.myBags.add(newline)
 
         print(f"MyBags: {self.myBags.bags}")
+
+        print("--------------------")
+        findbags = self.myBags.getDirectParents('shiny gold bag')
+        print(f"Findbags are {findbags}")
+        solutionbags = []
+        while findbags:
+            findbagNames = [x.bagName for x in findbags]
+            print(f"findbagNames: {findbagNames}")
+            print(f"solutionbags: {solutionbags}")
+            newbags = set(findbagNames) - set(solutionbags)
+            solutionbags.extend(list(newbags))
+            print(f"newbags: {newbags}")
+            findbags = self.myBags.getDirectParentsFromList(newbags)
+            print(f"New Find Bags: {findbags}")
+
+        print(f"Solution should be : {solutionbags}")
+        self.result = len(list(solutionbags))
+        print(f"Results: {self.result}")
         return self.result
     
 
@@ -100,9 +137,9 @@ class day1:
 
 test = filethingy('testinput.txt')
 
-mything = day1('testinput.txt')
+mything = part1('testinput.txt')
 mything.solve()
 
-# mything = countValid('input.txt')
-# day1 = mything.solve()
+mything = part1('input.txt')
+part1result = mything.solve()
 # # day2 = mything2.solve()
