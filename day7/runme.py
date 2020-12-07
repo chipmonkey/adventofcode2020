@@ -20,7 +20,7 @@ class bagStruct:
     
     def updateOrAdd(self, bagName, targetBag, targetQuantity):
         self.bagName = bagName
-        newTarget = {'targetBag': targetBag, 'targetQuantity': targetQuantity}
+        newTarget = {'targetBag': targetBag, 'targetQuantity': int(targetQuantity)}
         if self.contents and targetBag:
             self.contents.append(newTarget)
         elif targetBag:
@@ -44,6 +44,57 @@ class bagMap:
         if newbag not in self.bags:
             self.bags.append(newbag)
 
+    def getBagByName(self, bagName):
+        result = None
+        for bag in self.bags:
+            # print(f"Matching {bagName} to {bag}")
+            if bag.bagName == bagName:
+                result = bag
+        
+        return(result)
+
+    def getDirectChildren(self, bagName):
+        """Get list of bags with count that must be contained in a given bag"""
+        results = []
+        for bag in self.bags:
+            if bag.bagName == bagName:
+                for x in bag.contents:
+                    # print(f"content: {x['targetQuantity']}")
+                    if x['targetQuantity'] != '0':
+                        results.extend([x])
+                # results.extend(bag.contents)
+        # print(f"Direct Children: {results}")
+        return(results)
+
+    def getDirectChildrenFromList(self, bagNameList):
+        """"""
+        results = []
+        for bag in bagNameList:
+            results.extend(self.getDirectChildren(bag))
+        # print(f"results are {results}")
+        return(results)
+
+    def getBagCountRecursive(self, inbag):
+        print(f"Called getBagCountRecursive({inbag})")
+        results = 1  # This bag
+        # print(f"checking inbag: {inbag}")
+        for bag in inbag.contents:
+            # print(f"checking bag: {bag}")
+            quantity = bag['targetQuantity']
+            childbag = self.getBagByName(bag['targetBag'])
+            print(f"Child bag is : {childbag}")
+
+            if quantity == 0:
+                if bag['targetBag'] != 'no other bag':
+                    results = results + quantity  # Dead end on this child
+                    print(f"Adding {quantity} for {bag['targetBag']} inside {inbag.bagName}- total: {results}")
+            else:
+                childtotal = self.getBagCountRecursive(childbag)
+                results = results + quantity * childtotal
+                print(f"Adding {quantity} * {childtotal} for {bag['targetBag']} inside {inbag.bagName}- total: {results}")
+        return results
+
+
     def getDirectParents(self, bagName):
         """Get list of bags which contain a given bag"""
         results = []
@@ -51,7 +102,6 @@ class bagMap:
             for innerbag in bag.contents:
                 if bagName == innerbag['targetBag']:
                     print(f"Found {bagName} in {bag.bagName}")
-                    results.append(bag)
         print(f"Direct results are {results}")
         return(results)
     
@@ -104,8 +154,29 @@ class part1:
 
         print(f"Solution should be : {solutionbags}")
         self.result = len(list(solutionbags))
-        print(f"Results: {self.result}")
-        return self.result
+        print(f"Part 1 results: {self.result}")
+
+        # findchildren = self.myBags.getDirectChildren('shiny gold bag')
+        # totalbags = 0
+        # while findchildren:
+        #     print(f"Findchildren: {findchildren}")
+        #     quantities = [int(x['targetQuantity']) for x in findchildren]
+        #     print(f"Quantities: {quantities}")
+        #     if sum(quantities) > 0:
+        #         findbagNames = [x['targetBag'] for x in findchildren]
+        #         totalbags = totalbags + sum(quantities)
+        #         print(f"Total bags so far: {totalbags}")
+        #         findchildren = self.myBags.getDirectChildrenFromList(findbagNames)
+        #     else:
+        #         findchildren = False
+
+        myBag = self.myBags.getBagByName('shiny gold bag')
+        # myBag = self.myBags.getBagByName('faded blue bag')
+        print(f"My bag is : {myBag}")
+        newResults = self.myBags.getBagCountRecursive(myBag)
+        print(f"New Results: {newResults}")
+
+        return newResults
     
 
     def parseLine(self, line):
@@ -140,6 +211,9 @@ test = filethingy('testinput.txt')
 mything = part1('testinput.txt')
 mything.solve()
 
-mything = part1('input.txt')
+mything = part1('testinput.txt')
 part1result = mything.solve()
-# # day2 = mything2.solve()
+
+mything = part1('input.txt')
+part2result = mything.solve() - 1
+print(f"For whatever reason I'm off by one.  Real solution to day 7 part 2 is: {part2result}")
