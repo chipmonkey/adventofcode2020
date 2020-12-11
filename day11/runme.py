@@ -30,6 +30,39 @@ class code:
         # print(f"We counted {count} for ({x}, {y})")
         # time.sleep(1)
         return count
+    
+    def countOccupiedRays(self, x, y):
+        """ Counts 1 if any seat is in a line in the 8 cardinal directions, otherwise 0"""
+        # Right:
+        count = 0
+        for direction in ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']:
+        # for direction in ['NW']:
+            thisCount = 0
+            found = False
+            xi = x
+            yi = y
+            while not found and 0 <= xi <= self.maxX and 0 <= yi <= self.maxY:
+                if 'N' in direction:
+                    xi = xi - 1
+                elif 'S' in direction:
+                    xi = xi + 1
+                if 'E' in direction:
+                    yi = yi + 1
+                elif 'W' in direction:
+                    yi = yi - 1
+                # print(f"(xi, yi) is : ({xi}, {yi}) starting at ({x}, {y})")
+                if 0 <= xi < self.maxX and 0 <= yi < self.maxY:
+                    # print(f"Searching lines[{xi}][{yi}] which has {self.lines[xi][yi]}")
+                    if self.lines[xi][yi] == '#':
+                        thisCount += 1
+                        found = True
+                    if self.lines[xi][yi] == 'L':  # Exit if we find an empty seat first
+                        found = True
+            count = count + thisCount
+            # print(f"Found: {thisCount} while moving {direction} - total: {count}")
+        return(count)
+
+
 
     def countAllSeats(self):
         count = 0
@@ -57,7 +90,7 @@ class code:
         newLines = [[None]*self.maxY]*self.maxX
         for x in range(0, self.maxX):
             for y in range(0, self.maxY):
-                thisCount = self.countOccupiedAdjacent(x, y)
+                thisCount = self.countOccupiedRays(x, y)
                 countLines[x][y] = thisCount
                 # print(f"Count updated for ({x}, {y}) to {thisCount}")
                 # self.printPage(countLines)
@@ -66,7 +99,7 @@ class code:
                 if self.lines[x][y] == 'L' and thisCount == 0:
                     # print(f"{x}, {y}")
                     newLines[x][y] = '#'
-                elif self.lines[x][y] == '#' and thisCount >= 4:
+                elif self.lines[x][y] == '#' and thisCount >= 5:
                     newLines[x][y] = 'L'
                 else:
                     newLines[x][y] = self.lines[x][y]
@@ -98,9 +131,10 @@ class machine:
     def __init__(self, filename):
         self.input = code(filename)
 
-input = code('testinput.txt')
-print(f"Testing countOccupiedAdjacent(2,2)")
-result = input.countOccupiedAdjacent(2,2)
+input = code('testeight.txt')
+print(f"Testing countOccupiedRays(4, 3)")
+print(input.lines[4][3])
+result = input.countOccupiedRays(4,3)
 print(f"result: {result}")
 # input.printPage(input.lines)
 # input.printPage(input.lines)
@@ -110,6 +144,8 @@ print(f"result: {result}")
 # print(f"result: {result}")
 # print(f"Step 2")
 # input.iterate1()
+
+input = code('testinput.txt')
 input.solve()
 
 # myMachine = machine('testinput.txt')
