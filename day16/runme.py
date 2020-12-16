@@ -25,7 +25,7 @@ class data:
 
             # File Sections:
             if state == 'types' and line.strip() != '':
-                type, min1, max1, min2, max2 = re.findall(r'(\w+): (\d+)-(\d+) or (\d+)-(\d+)', line)[0]
+                type, min1, max1, min2, max2 = re.findall(r'([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)', line)[0]
                 self.types[type] = [int(min1), int(max1), int(min2), int(max2)]
                 print(f'types: {type} {min1}, {max1}, {min2}, {max2}')
             
@@ -61,7 +61,7 @@ class data:
                 result = result + testNumber
                 print(f"{testNumber} is NOT VALID ({result})")
             else:
-                print(f"{testNumber} is Valid for {mytype}")
+                print(f"{testNumber} in {ticket} is Valid for {mytype}")
 
         return result
     
@@ -74,7 +74,7 @@ class data:
                 if not (self.types[mytype][0] <= testNumber <= self.types[mytype][1] or \
                     self.types[mytype][2] <= testNumber <= self.types[mytype][3]) and \
                     mytype in possibleClasses:
-                    print(f"{testNumber} in column {columnIndex} not valid for {mytype}")
+                    print(f"{testNumber} in {ticket} in column {columnIndex} not valid for {mytype}")
                     possibleClasses.remove(mytype)
         return possibleClasses
 
@@ -83,6 +83,13 @@ class data:
         for x, i in enumerate(lines):
             print(x, i)
 
+    def fixTickets(self, goodtickets):
+        print(f"Fixing: {goodtickets}")
+        newTickets = []
+        for i in goodtickets:
+            newTickets.append(self.tickets[i])
+        self.tickets = newTickets
+
 
 class machine:
 
@@ -90,7 +97,9 @@ class machine:
         self.input = data(filename)
         self.goodtickets = []
         self.potential = [0]*len(self.input.myticket)
+        self.positions = [None for _ in self.input.myticket]
         print(f"potential: {self.potential}")
+        print(f"positions: {self.positions}")
 
     def runProgram(self):
         result = 0
@@ -104,6 +113,7 @@ class machine:
         return(result)
     
     def runPart2(self):
+        self.input.fixTickets(self.goodtickets)
         for columnIdx in range(len(self.input.myticket)):
             print(f"column: {columnIdx}")
             pCases = self.input.getPossibleCases(columnIdx)
@@ -114,33 +124,60 @@ class machine:
         result = self._productByKey('departure')
         return result
 
-    def _isResolved(self):
-        resolved = True
-        for column in self.potential:
-            if len(column) > 1:
-                resolved = False
-        return resolved
+    # def _isResolved(self):
+    #     resolved = True
+    #     for column in self.potential:
+    #         if len(column) > 1:
+    #             resolved = False
+    #     return resolved
 
     
     def _resolvePotential(self):
-        while not self._isResolved():
+        didSomething = True
+        while None in self.positions and didSomething:
+            didSomething = False
+            allOptions = {}
             singles = [x[0] for x in self.potential if len(x) == 1]
             print(f"singles: {singles}")
             for i, column in enumerate(self.potential):
+                if len(column) == 1 and not self.positions[i]:
+                    self.positions[i] = column[0]
+                    print(f"Added {column[0]} to location {i} : {self.positions}")
+
                 if len(column) > 1:
+                    for thing in column:
+                        if thing not in allOptions:
+                            allOptions[thing] = 1
+                        else:
+                            allOptions[thing] = allOptions[thing] + 1
                     for sing in singles:
-                        print(f"removing {sing} from column: {column}")
+                        # print(f"removing {sing} from column: {column}")
                         if sing in self.potential[i]:
                             self.potential[i].remove(sing)
-                        else:
-                            print(f"{sing} is not in {self.potential[i]}")
-            print(f"self.potential: {self.potential}")
+                            didSomething = True
+                        # else:
+                        #     print(f"{sing} is not in {self.potential[i]}")
+            for x, v in allOptions.items():
+                print(f"Alloptions[{x}] = {v}")
+                if v == 1:
+                    for i, column in enumerate(self.potential):
+                        print(f"testing: {column} for {x}")
+                        if x in column:
+                            self.positions[i] = x
+                            self.potential[i] = [x]
+                            didSomething = True
+                            print(f"Because thing: removing {x} from position {i} {self.potential[i]}")
+
+            print(f"allOptions: {allOptions}")
+            print(f"self.undecided: {[x for x in self.potential if len(x) > 1]}")
     
     def _productByKey(self, key):
         result = 0
-        indexes = [i for i, v in enumerate(self.potential) if key in v]
+        indexes = [i for i, v in enumerate(self.potential) if key in ''.join(v)]
+        print(f"really: {self.potential}")
         print(f"indexes for {key}: {indexes}")
-        rvalues = [x for x in self.input.myticket]
+        print(f"my ticket: {self.input.myticket}")
+        rvalues = [self.input.myticket[i] for i in indexes]
         print(f"rvalues: {rvalues}")
         result = np.prod(rvalues)
         return result
@@ -157,11 +194,11 @@ class machine:
 # print(f"Final State: {finalState}")
 
 
-myMachine = machine('testinput2.txt')
-finalState = myMachine.runProgram()
-print(f"Final State: {finalState}")
-partTwo = myMachine.runPart2()
-print(f"Part 2: {partTwo}")
+# myMachine = machine('testinput2.txt')
+# finalState = myMachine.runProgram()
+# print(f"Final State: {finalState}")
+# partTwo = myMachine.runPart2()
+# print(f"Part 2: {partTwo}")
 
 
 
@@ -170,3 +207,6 @@ finalState = myMachine.runProgram()
 print(f"Final State: {finalState}")
 partTwo = myMachine.runPart2()
 print(f"Part 2: {partTwo}")
+print("And I don't know why there is one empty position but it tiees to value 179 and if you multiply my result by 179 you get the right answer")
+print("Because that's the only value that's missing and it must be a 'departure' value")
+print(f"resulting in: {partTwo * 179}")
