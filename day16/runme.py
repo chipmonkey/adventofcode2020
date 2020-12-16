@@ -48,8 +48,11 @@ class data:
 
     def testvalid(self, ticket):
         result = 0
+        validTicket = True
         for testNumber in ticket:
             # print(f"testNumber: {testNumber}")
+            if testNumber == 0:
+                print(f"Working on a zero")
             valid = False
             for mytype in self.types:
                 print(f"mytype: {mytype} - {self.types[mytype]}")
@@ -60,10 +63,11 @@ class data:
             if not valid:
                 result = result + testNumber
                 print(f"{testNumber} is NOT VALID ({result})")
+                validTicket = False
             else:
                 print(f"{testNumber} in {ticket} is Valid for {mytype}")
 
-        return result
+        return result, validTicket
     
     def getPossibleCases(self, columnIndex):
         possibleClasses = list(self.types.keys())
@@ -74,7 +78,8 @@ class data:
                 if not (self.types[mytype][0] <= testNumber <= self.types[mytype][1] or \
                     self.types[mytype][2] <= testNumber <= self.types[mytype][3]) and \
                     mytype in possibleClasses:
-                    print(f"{testNumber} in {ticket} in column {columnIndex} not valid for {mytype}")
+                    if columnIndex == 13:
+                        print(f"{testNumber} in {ticket} in column {columnIndex} not valid for {mytype}")
                     possibleClasses.remove(mytype)
         return possibleClasses
 
@@ -98,16 +103,16 @@ class machine:
         self.goodtickets = []
         self.potential = [0]*len(self.input.myticket)
         self.positions = [None for _ in self.input.myticket]
-        print(f"potential: {self.potential}")
-        print(f"positions: {self.positions}")
 
     def runProgram(self):
         result = 0
         for idx, myticket in enumerate(self.input.tickets):
-            thisResult = self.input.testvalid(myticket)
-            result += thisResult
-            if thisResult == 0:
+            thisResult, isValid = self.input.testvalid(myticket)
+            if isValid:
                 self.goodtickets.append(idx)
+            else:
+                result += thisResult
+
 
         print(f"Good Tickets: {self.goodtickets}")
         return(result)
@@ -115,9 +120,9 @@ class machine:
     def runPart2(self):
         self.input.fixTickets(self.goodtickets)
         for columnIdx in range(len(self.input.myticket)):
-            print(f"column: {columnIdx}")
             pCases = self.input.getPossibleCases(columnIdx)
-            print(f"Column: {columnIdx} has pc: {pCases}")
+            if columnIdx == 13:
+                print(f"Column: {columnIdx} has pc: {pCases}")
             self.potential[columnIdx] = pCases
         
         self._resolvePotential()
@@ -152,7 +157,7 @@ class machine:
                             allOptions[thing] = allOptions[thing] + 1
                     for sing in singles:
                         # print(f"removing {sing} from column: {column}")
-                        if sing in self.potential[i]:
+                        if sing in self.potential[i] and len(self.potential[i]) > 1:
                             self.potential[i].remove(sing)
                             didSomething = True
                         # else:
@@ -161,7 +166,8 @@ class machine:
                 print(f"Alloptions[{x}] = {v}")
                 if v == 1:
                     for i, column in enumerate(self.potential):
-                        print(f"testing: {column} for {x}")
+                        if i == 13:
+                            print(f"testing: {column} for {x}")
                         if x in column:
                             self.positions[i] = x
                             self.potential[i] = [x]
@@ -207,6 +213,7 @@ finalState = myMachine.runProgram()
 print(f"Final State: {finalState}")
 partTwo = myMachine.runPart2()
 print(f"Part 2: {partTwo}")
-print("And I don't know why there is one empty position but it tiees to value 179 and if you multiply my result by 179 you get the right answer")
-print("Because that's the only value that's missing and it must be a 'departure' value")
-print(f"resulting in: {partTwo * 179}")
+# Fixed this stupid bug!
+# print("And I don't know why there is one empty position but it tiees to value 179 and if you multiply my result by 179 you get the right answer")
+# print("Because that's the only value that's missing and it must be a 'departure' value")
+# print(f"resulting in: {partTwo * 179}")
