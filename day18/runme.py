@@ -61,9 +61,25 @@ class machine:
             pValue = self._calculate(pStuff)
             line = lStuff + str(pValue) + rStuff
             print(f"Line is now: {line}")
+
+        rvalue = 0
+
+        while '*' in line:
+            spot = line.find('*')
+            lStuff = line[0:spot-1]
+            rStuff = line[spot+1:]
+            lvalue = self._calculate(lStuff)
+            rvalue = self._calculate(rStuff)
+            rvalue = lvalue * rvalue
+            line = str(rvalue)
+            print(f"From multiplication: {line}")
+            return self._calculate(line)
         
         ops = line.split(' ')
-        rvalue = 0
+        if '' in ops:
+            ops.remove('')
+        
+        print(f"Got here with : {ops}")
         state = 's'
         for value in ops:
             if digit.match(value):
@@ -72,13 +88,15 @@ class machine:
                 elif state == '+':
                     rvalue += int(value)
                 elif state == '*':
-                    rvalue *= int(value)
+                    print(f"Shouldn't be any plusses here")
+                    exit()
+                    # rvalue *= int(value)
                 else:
                     print(f"{value} not a valid state!")
                     exit()
             else:
                 state = value
-        print(f"Finished calculating")
+        print(f"Finished calculating: {rvalue}")
 
         return rvalue
 
@@ -90,9 +108,9 @@ myMachine = machine('testinput.txt')
 finalState = myMachine.runProgram()
 print(f"Final State: {finalState}")
 
-myMachine = machine('testinput2.txt')
-finalState = myMachine.runProgram()
-print(f"Final State: {finalState}")
+# myMachine = machine('testinput2.txt')
+# finalState = myMachine.runProgram()
+# print(f"Final State: {finalState}")
 
 myMachine = machine('input.txt')
 finalState = myMachine.runProgram()
