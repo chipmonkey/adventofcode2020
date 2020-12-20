@@ -3,6 +3,15 @@ import re
 import time
 
 from collections import Counter
+import builtins as __builtin__
+
+DEBUG = False
+
+def print(*args, **kwargs):
+    if DEBUG:
+        return __builtin__.print(*args, **kwargs)
+    else:
+        return 0
 
 class data:
 
@@ -152,4 +161,4 @@ print(f"Final State: {finalState}")
 
 myMachine = machine('input.txt')
 finalState = myMachine.runProgram()
-print(f"Final State: {finalState}")
+__builtin__.print(f"Final State: {finalState}")
